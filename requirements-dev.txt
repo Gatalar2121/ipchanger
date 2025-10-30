@@ -1,0 +1,19 @@
+# Development dependencies for Network IP Changer
+# Install with: pip install -r requirements-dev.txt
+
+# Production dependencies
+PySide6>=6.0.0
+
+# Development and build tools
+pyinstaller>=5.0.0
+pylint>=2.15.0
+black>=22.0.0
+isort>=5.10.0
+
+# Documentation tools
+markdown>=3.4.0
+mkdocs>=1.4.0
+
+# Testing tools (if tests are added in future)
+pytest>=7.0.0
+pytest-qt>=4.0.0
