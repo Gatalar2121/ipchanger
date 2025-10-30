@@ -23,12 +23,13 @@ A comprehensive Windows network configuration tool with enhanced GUI and CLI int
 
 ## �🚀 Features
 
-### Core Functionality
+### Core Functionality (Both Versions)
 - **Quick Network Profile Switching**: Save and switch between multiple network configurations instantly
 - **Static IP Configuration**: Set custom IP addresses, subnet masks, gateways, and DNS servers
 - **DHCP Support**: Easy toggle between static and automatic IP assignment
 - **Network Interface Detection**: Automatically detects all available network adapters (Ethernet, WiFi, USB, etc.)
 - **Undo Functionality**: Revert to previous network settings with one click
+- **Network Adapter Control**: Enable/disable network adapters with GUI buttons
 
 ### 🆕 New in v2.0.0
 - **Command-Line Interface**: Full CLI support with interactive and batch modes
@@ -37,8 +38,10 @@ A comprehensive Windows network configuration tool with enhanced GUI and CLI int
 - **VPN Profile Management**: Create, manage, and connect to VPN profiles using Windows RASDIAL
 - **Advanced Routing**: Static route configuration and management
 - **Real-Time Monitoring**: Network traffic monitoring with charts and statistics
-- **Network Adapter Control**: Enable/disable network adapters programmatically
 - **Batch Configuration**: Apply settings from JSON/CSV files to multiple adapters
+
+### v1.0.0 Exclusive Features
+- None (all v1.0.0 features have been ported to v2.0.0)
 
 ### Advanced Features
 - **Multi-Language Support**: Available in English, Arabic, Persian, Kurdish (Sorani), Kurdish, and Turkish
@@ -213,6 +216,8 @@ ipchanger/
 | Basic IP configuration | ✅ | ✅ |
 | Profile management | ✅ | ✅ Enhanced with import/export |
 | Multi-language support | ✅ | ✅ |
+| **Undo functionality** | ✅ GUI button | ✅ GUI button |
+| **Adapter enable/disable** | ❌ | ✅ GUI buttons + CLI |
 | Command-line interface | ❌ | ✅ |
 | Network testing suite | ❌ | ✅ |
 | VPN management | ❌ | ✅ |

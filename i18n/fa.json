@@ -52,6 +52,8 @@
   "import_profiles":"وارد کردن پروفایل‌ها",
   "export_profiles":"خروجی گرفتن پروفایل‌ها",
   "undo_last_change":"برگشت دادن آخرین تغییر",
+  "enable_adapter":"فعال‌سازی آداپتور",
+  "disable_adapter":"غیرفعال‌سازی آداپتور",
   "open_log":"باز کردن گزارش",
   "no_adapter":"لطفاً ابتدا یک رابط را انتخاب کنید.",
   "success":"موفق",

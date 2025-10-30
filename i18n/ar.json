@@ -52,6 +52,8 @@
   "import_profiles":"استيراد الملفات",
   "export_profiles":"تصدير الملفات",
   "undo_last_change":"التراجع عن آخر تغيير",
+  "enable_adapter":"تفعيل المحول",
+  "disable_adapter":"تعطيل المحول",
   "open_log":"فتح السجل",
   "no_adapter":"الرجاء اختيار واجهة أولاً.",
   "success":"نجاح",

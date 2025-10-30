@@ -407,6 +407,19 @@ class OriginalNetworkTab(QWidget):
         self.apply_btn = QPushButton()
         self.apply_btn.clicked.connect(self.apply_configuration)
         
+        # Undo and Adapter Control buttons
+        adapter_control_layout = QHBoxLayout()
+        self.undo_btn = QPushButton()
+        self.undo_btn.clicked.connect(self.undo_last_change)
+        self.enable_adapter_btn = QPushButton()
+        self.enable_adapter_btn.clicked.connect(self.enable_adapter)
+        self.disable_adapter_btn = QPushButton()
+        self.disable_adapter_btn.clicked.connect(self.disable_adapter)
+        
+        adapter_control_layout.addWidget(self.undo_btn)
+        adapter_control_layout.addWidget(self.enable_adapter_btn)
+        adapter_control_layout.addWidget(self.disable_adapter_btn)
+        
         # Profile management
         self.profile_group = QGroupBox()
         profile_layout = QVBoxLayout()
@@ -452,6 +465,7 @@ class OriginalNetworkTab(QWidget):
         layout.addWidget(self.current_group)
         layout.addWidget(self.config_group)
         layout.addWidget(self.apply_btn)
+        layout.addLayout(adapter_control_layout)
         layout.addWidget(self.profile_group)
         
         self.setLayout(layout)
@@ -478,6 +492,9 @@ class OriginalNetworkTab(QWidget):
         self.gateway_label.setText(tr_gui("default_gateway", "Default Gateway:"))
         self.dns_label.setText(tr_gui("dns_servers", "DNS Servers:"))
         self.apply_btn.setText(tr_gui("apply_configuration", "Apply"))
+        self.undo_btn.setText(tr_gui("undo_last_change", "Undo Last Change"))
+        self.enable_adapter_btn.setText(tr_gui("enable_adapter", "Enable Adapter"))
+        self.disable_adapter_btn.setText(tr_gui("disable_adapter", "Disable Adapter"))
         
         self.profile_group.setTitle(tr_gui("profiles", "Profiles"))
         self.save_profile_btn.setText(tr_gui("save_profile", "Save Profile"))
@@ -558,6 +575,9 @@ class OriginalNetworkTab(QWidget):
         if not adapter_name:
             QMessageBox.warning(self, tr("failed"), tr("no_adapter"))
             return
+        
+        # Save current configuration for undo before applying changes
+        self.save_undo(adapter_name)
         
         try:
             if self.dhcp_radio.isChecked():
@@ -859,6 +879,180 @@ class OriginalNetworkTab(QWidget):
                 
             except Exception as e:
                 QMessageBox.critical(self, tr("failed"), f"Failed to delete profile: {str(e)}")
+    
+    def save_undo(self, adapter_name):
+        """Save current network configuration for undo."""
+        from pathlib import Path
+        from datetime import datetime
+        
+        UNDO_PATH = Path.home() / ".ipchanger" / "netconfig_undo.json"
+        UNDO_PATH.parent.mkdir(parents=True, exist_ok=True)
+        
+        try:
+            import json
+            cfg = get_adapter_config(adapter_name)
+            
+            backup_data = {
+                "interface": adapter_name,
+                "cfg": cfg,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            with open(UNDO_PATH, 'w', encoding='utf-8') as f:
+                json.dump(backup_data, f, indent=2)
+                
+            log_message(f"Saved undo backup for {adapter_name}")
+        except Exception as e:
+            log_message(f"Failed to save undo backup: {str(e)}", "ERROR")
+    
+    def undo_last_change(self):
+        """Undo the last network configuration change."""
+        from pathlib import Path
+        UNDO_PATH = Path.home() / ".ipchanger" / "netconfig_undo.json"
+        
+        if not UNDO_PATH.exists():
+            QMessageBox.information(
+                self, 
+                tr_gui("undo_last_change", "Undo Last Change"), 
+                tr_gui("undo_no_backup", "No backup found. Apply a configuration first.")
+            )
+            return
+        
+        try:
+            import json
+            with open(UNDO_PATH, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            ifname = data.get("interface")
+            cfg = data.get("cfg", {})
+            
+            if not ifname:
+                QMessageBox.warning(self, tr("failed"), "Invalid backup data")
+                return
+            
+            # Apply the backed up configuration without recording undo
+            if cfg.get("dhcp"):
+                # Restore DHCP
+                rc, out, err = run_netsh(["interface", "ip", "set", "address", f'name="{ifname}"', "dhcp"])
+                rc2, out2, err2 = run_netsh(["interface", "ip", "set", "dns", f'name="{ifname}"', "dhcp"])
+                
+                if rc == 0:
+                    QMessageBox.information(
+                        self, 
+                        tr_gui("success", "Success"), 
+                        tr_gui("undo_done", "Previous configuration restored successfully")
+                    )
+                    self.show_current_config()
+                else:
+                    QMessageBox.critical(self, tr("failed"), f"Failed to restore: {err or out}")
+            else:
+                # Restore static IP
+                ip = cfg.get("ip")
+                mask = cfg.get("mask")
+                gateway = cfg.get("gateway")
+                dns_list = cfg.get("dns", [])
+                
+                if ip:
+                    cmd = ["interface", "ip", "set", "address", f'name="{ifname}"', "static", ip]
+                    if mask:
+                        cmd.append(mask)
+                    if gateway:
+                        cmd.append(gateway)
+                    
+                    rc, out, err = run_netsh(cmd)
+                    
+                    if rc == 0:
+                        # Restore DNS
+                        for i, dns_server in enumerate(dns_list):
+                            if dns_server:
+                                dns_cmd = ["interface", "ip", "set", "dns", f'name="{ifname}"']
+                                if i == 0:
+                                    dns_cmd.extend(["static", dns_server])
+                                else:
+                                    dns_cmd.extend(["static", dns_server, f"index={i+1}"])
+                                run_netsh(dns_cmd)
+                        
+                        QMessageBox.information(
+                            self, 
+                            tr_gui("success", "Success"), 
+                            tr_gui("undo_done", "Previous configuration restored successfully")
+                        )
+                        self.show_current_config()
+                    else:
+                        QMessageBox.critical(self, tr("failed"), f"Failed to restore: {err or out}")
+                
+        except Exception as e:
+            QMessageBox.critical(self, tr("failed"), f"Undo failed: {str(e)}")
+    
+    def enable_adapter(self):
+        """Enable the selected network adapter."""
+        adapter_name = self.interface_combo.currentText()
+        if not adapter_name:
+            QMessageBox.warning(self, tr("failed"), "Please select an adapter")
+            return
+        
+        reply = QMessageBox.question(
+            self,
+            tr_gui("enable_adapter", "Enable Adapter"),
+            f"Enable adapter '{adapter_name}'?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            rc, out, err = run_netsh(["interface", "set", "interface", f'name="{adapter_name}"', "admin=enable"])
+            
+            if rc == 0:
+                QMessageBox.information(
+                    self, 
+                    tr_gui("success", "Success"), 
+                    f"Adapter '{adapter_name}' enabled successfully"
+                )
+                log_message(f"Enabled adapter: {adapter_name}")
+                self.refresh_interfaces()
+            else:
+                QMessageBox.critical(self, tr("failed"), f"Failed to enable adapter: {err or out}")
+                log_message(f"Failed to enable adapter {adapter_name}: {err or out}", "ERROR")
+    
+    def disable_adapter(self):
+        """Disable the selected network adapter."""
+        adapter_name = self.interface_combo.currentText()
+        if not adapter_name:
+            QMessageBox.warning(self, tr("failed"), "Please select an adapter")
+            return
+        
+        # Safety check: count active adapters
+        adapters = list_adapters()
+        if len(adapters) <= 1:
+            QMessageBox.warning(
+                self,
+                tr_gui("disable_adapter", "Disable Adapter"),
+                "Cannot disable the only active network adapter"
+            )
+            return
+        
+        reply = QMessageBox.question(
+            self,
+            tr_gui("disable_adapter", "Disable Adapter"),
+            f"Disable adapter '{adapter_name}'? This will disconnect your network.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            rc, out, err = run_netsh(["interface", "set", "interface", f'name="{adapter_name}"', "admin=disable"])
+            
+            if rc == 0:
+                QMessageBox.information(
+                    self, 
+                    tr_gui("success", "Success"), 
+                    f"Adapter '{adapter_name}' disabled successfully"
+                )
+                log_message(f"Disabled adapter: {adapter_name}")
+                self.refresh_interfaces()
+            else:
+                QMessageBox.critical(self, tr("failed"), f"Failed to disable adapter: {err or out}")
+                log_message(f"Failed to disable adapter {adapter_name}: {err or out}", "ERROR")
 
 class NetworkTestingTab(QWidget):
     """Network testing and diagnostics tab."""

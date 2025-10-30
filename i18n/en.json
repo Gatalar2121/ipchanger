@@ -58,6 +58,8 @@
   "import_profiles":"Import Profiles",
   "export_profiles":"Export Profiles",
   "undo_last_change":"Undo Last Change",
+  "enable_adapter":"Enable Adapter",
+  "disable_adapter":"Disable Adapter",
   "open_log":"Open Log",
   "no_adapter":"Please select an interface first.",
   "success":"Success",

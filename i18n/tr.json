@@ -58,6 +58,8 @@
   "import_profiles":"Profilleri İçe Aktar",
   "export_profiles":"Profilleri Dışa Aktar",
   "undo_last_change":"Son Değişikliği Geri Al",
+  "enable_adapter":"Bağdaştırıcıyı Etkinleştir",
+  "disable_adapter":"Bağdaştırıcıyı Devre Dışı Bırak",
   "open_log":"Günlüğü Aç",
   "no_adapter":"Lütfen önce bir arayüz seçin.",
   "success":"Başarılı",

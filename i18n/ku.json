@@ -52,6 +52,8 @@
   "import_profiles": "Profîlan Import Bike",
   "export_profiles": "Profîlan Export Bike",
   "undo_last_change": "Guhertina Dawî Vegerîne",
+  "enable_adapter": "Adapter Çalak Bike",
+  "disable_adapter": "Adapter Neçalak Bike",
   "open_log": "Log Vekirin",
   "no_adapter": "Ji kerema xwe pêwendiyek hilbijêrin.",
   "success": "Serkeftî",
