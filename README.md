@@ -1,6 +1,6 @@
-# Network IP Changer
+# Network IP Changer v2.0.0
 
-A professional Windows network configuration tool with a modern GUI that allows users to easily switch between different network profiles and manage IP settings. Features multi-language support and enterprise-ready functionality.
+A comprehensive Windows network configuration tool with enhanced GUI and CLI interfaces that allows users to easily switch between different network profiles, manage VPN connections, monitor network performance, and configure advanced networking features. Features multi-language support and enterprise-ready functionality.
 
 ## 🚀 Features
 
@@ -11,6 +11,16 @@ A professional Windows network configuration tool with a modern GUI that allows 
 - **Network Interface Detection**: Automatically detects all available network adapters (Ethernet, WiFi, USB, etc.)
 - **Undo Functionality**: Revert to previous network settings with one click
 
+### 🆕 New in v2.0.0
+- **Command-Line Interface**: Full CLI support with interactive and batch modes
+- **Enhanced Tabbed GUI**: Professional interface with organized feature tabs
+- **Network Testing Suite**: Comprehensive connectivity, speed, and DNS testing
+- **VPN Profile Management**: Create, manage, and connect to VPN profiles using Windows RASDIAL
+- **Advanced Routing**: Static route configuration and management
+- **Real-Time Monitoring**: Network traffic monitoring with charts and statistics
+- **Network Adapter Control**: Enable/disable network adapters programmatically
+- **Batch Configuration**: Apply settings from JSON/CSV files to multiple adapters
+
 ### Advanced Features
 - **Multi-Language Support**: Available in English, Arabic, Persian, Kurdish (Sorani), Kurdish, and Turkish
 - **Right-to-Left (RTL) Language Support**: Proper UI layout for Arabic and Persian languages
@@ -20,7 +30,10 @@ A professional Windows network configuration tool with a modern GUI that allows 
 - **Administrator Privilege Handling**: Automatic elevation request with user-friendly error messages
 
 ### Enterprise Ready
-- **Batch Operations**: Apply settings to multiple interfaces
+- **Automation Support**: CLI interface for scripting and automated deployments
+- **Monitoring Dashboard**: Real-time network performance monitoring with SQLite database
+- **VPN Integration**: Enterprise VPN profile management and connection automation
+- **Batch Operations**: Apply settings to multiple interfaces from configuration files
 - **Profile Templates**: Pre-built configurations for common enterprise scenarios
 - **Silent Operation**: Hidden command execution to prevent UI flickering
 - **Robust Error Handling**: Graceful handling of network operation failures
@@ -36,8 +49,11 @@ A professional Windows network configuration tool with a modern GUI that allows 
 
 ## 🛠️ Installation
 
-### Option 1: Download Pre-built Executable (Recommended)
-1. Download the latest `NetworkIPChanger.exe` from the [Releases](../../releases) page
+### Option 1: Download Pre-built Executables (Recommended)
+1. Download from the [Releases](../../releases) page:
+   - `NetworkIPChanger_v2.0.0.exe` - Full enhanced GUI + CLI features
+   - `NetworkIPChanger_CLI_v2.0.0.exe` - CLI-only version for servers
+   - `NetworkIPChanger_v1_compatible.exe` - Original v1.0.0 interface
 2. Right-click the executable and select "Run as administrator"
 3. The application will automatically request administrator privileges
 
@@ -72,13 +88,50 @@ A professional Windows network configuration tool with a modern GUI that allows 
 
 ## 🖥️ Usage
 
-### Basic Usage
+### GUI Usage
 1. **Launch the application** as administrator (required for network changes)
 2. **Select Network Interface**: Choose your network adapter from the dropdown
 3. **Configure Settings**:
    - Choose between DHCP (automatic) or static IP configuration
    - For static IP: Enter IP address, subnet mask, gateway, and DNS servers
 4. **Apply Configuration**: Click "Apply" to save changes
+
+### 🆕 CLI Usage
+
+**Interactive CLI Mode:**
+```bash
+NetworkIPChanger_v2.0.0.exe --cli
+```
+
+**Quick Commands:**
+```bash
+# List all network adapters
+NetworkIPChanger_v2.0.0.exe list-adapters
+
+# Test network connectivity
+NetworkIPChanger_v2.0.0.exe test-connectivity
+
+# Configure adapter to DHCP
+NetworkIPChanger_v2.0.0.exe configure --adapter "Wi-Fi" --dhcp
+
+# Configure static IP
+NetworkIPChanger_v2.0.0.exe configure --adapter "Ethernet" --static --ip 192.168.1.100 --gateway 192.168.1.1
+
+# Monitor network for 60 seconds
+NetworkIPChanger_v2.0.0.exe monitor --duration 60
+
+# Show help
+NetworkIPChanger_v2.0.0.exe --help
+```
+
+**Batch Configuration:**
+```bash
+# Apply configuration from file
+NetworkIPChanger_CLI_v2.0.0.exe batch-configure --file network_config.json
+
+# Configure multiple adapters
+NetworkIPChanger_CLI_v2.0.0.exe batch-configure --csv adapters.csv
+```
 
 ### Profile Management
 1. **Save Profile**: Configure your settings and click "Save Profile" to store the configuration

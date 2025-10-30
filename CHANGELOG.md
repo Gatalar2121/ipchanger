@@ -5,7 +5,69 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-10-30
+## [2.0.0] - 2024-10-30
+
+### 🎉 Major Release - Complete Feature Enhancement
+
+### Added
+- **Command-Line Interface (CLI)**
+  - Interactive CLI mode with full feature access
+  - Quick command execution for automation
+  - Batch configuration from JSON/CSV files
+  - Help system and comprehensive error handling
+
+- **Enhanced GUI Interface**
+  - New tabbed interface design
+  - Organized feature sections (Network, Testing, Monitoring)
+  - Backward compatibility with v1.0.0 interface
+  - Real-time network statistics display
+
+- **Network Testing Suite**
+  - Comprehensive ping testing to multiple hosts
+  - DNS resolution testing with multiple servers
+  - Network speed testing with progress indicators
+  - Full connectivity test suite
+
+- **VPN Profile Management**
+  - Windows RASDIAL integration
+  - VPN profile creation and management
+  - Automatic connection/disconnection
+  - Profile import/export functionality
+
+- **Advanced Routing Configuration**
+  - Static route management
+  - Route table viewing and modification
+  - Persistent route configuration
+  - Route validation and testing
+
+- **Real-Time Network Monitoring**
+  - Live network statistics tracking
+  - SQLite database for historical data
+  - Network performance charts (with matplotlib)
+  - Connectivity status dashboard
+
+- **Network Adapter Control**
+  - Enable/disable network adapters
+  - Adapter status monitoring
+  - Bulk adapter operations
+
+### Enhanced
+- **Profile Management**: Extended profile format with new features
+- **Multi-Language Support**: Enhanced translation system with better RTL support
+- **Error Handling**: Comprehensive error reporting and user feedback
+- **Build System**: Multiple executable variants for different use cases
+
+### Build Variants
+- `NetworkIPChanger_v2.0.0.exe` - Full enhanced version with GUI + CLI
+- `NetworkIPChanger_CLI_v2.0.0.exe` - CLI-only version for servers
+- `NetworkIPChanger_v1_compatible.exe` - Original v1.0.0 interface
+
+### Backward Compatibility
+- Full compatibility with v1.0.0 profiles
+- Original GUI interface preserved as compatibility option
+- Existing functionality unchanged with smooth upgrade path
+
+## [1.0.0] - 2024-10-29
 
 ### Added
 - Initial release of Network IP Changer
