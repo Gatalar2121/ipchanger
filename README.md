@@ -2,7 +2,26 @@
 
 A comprehensive Windows network configuration tool with enhanced GUI and CLI interfaces that allows users to easily switch between different network profiles, manage VPN connections, monitor network performance, and configure advanced networking features. Features multi-language support and enterprise-ready functionality.
 
-## 🚀 Features
+## � Quick Start - Which File to Use?
+
+**This repository contains TWO versions:**
+
+| Version | Main File | Description | Who Should Use |
+|---------|-----------|-------------|----------------|
+| **v2.0.0** ⭐ | `ipchanger_v2.py` | **RECOMMENDED** - Enhanced version with tabbed GUI, CLI support, monitoring, VPN, testing suite | All new users, automation needs |
+| **v1.0.0** | `ipchanger.py` | Original simple interface | Users who prefer the classic v1.0.0 experience |
+
+**🎯 For most users**: Use the pre-built executables from [Releases](../../releases):
+- `NetworkIPChanger_v2.0.0.exe` - **Latest v2.0.0 with all features**
+- `NetworkIPChanger_v1_compatible.exe` - Original v1.0.0 interface
+
+**📦 Running from source:**
+- **v2.0.0**: `python ipchanger_v2.py` (requires `enhanced_gui.py`, `ipchanger_enhanced.py`, `advanced_networking.py`)
+- **v1.0.0**: `python ipchanger.py` (standalone file)
+
+> **Note**: v1.0.0 is maintained for backward compatibility. All new features are in v2.0.0.
+
+## �🚀 Features
 
 ### Core Functionality
 - **Quick Network Profile Switching**: Save and switch between multiple network configurations instantly
@@ -160,20 +179,47 @@ Language files are located in the `i18n/` directory and can be easily modified o
 
 ```
 ipchanger/
-├── ipchanger.py              # Main application file
-├── requirements.txt          # Python dependencies
-├── NetworkIPChanger.spec     # PyInstaller build configuration
-├── common_networks.json      # Pre-configured home network profiles
-├── sample_profiles.json      # Sample network configurations
-├── enterprise_profiles.json  # Enterprise network templates
-└── i18n/                    # Internationalization files
-    ├── en.json              # English translations
-    ├── ar.json              # Arabic translations
-    ├── fa.json              # Persian translations
-    ├── ku.json              # Kurdish translations
-    ├── ku_sorani.json       # Kurdish Sorani translations
-    └── tr.json              # Turkish translations
+├── 📌 V2.0.0 FILES (RECOMMENDED)
+│   ├── ipchanger_v2.py           # ⭐ Main entry point for v2.0.0
+│   ├── enhanced_gui.py           # Enhanced tabbed GUI interface
+│   ├── ipchanger_enhanced.py     # Enhanced CLI and core functions
+│   ├── advanced_networking.py    # VPN, routing, monitoring features
+│   └── build_v2.bat             # Build script for all three executables
+│
+├── 📌 V1.0.0 FILES (LEGACY)
+│   ├── ipchanger.py              # Original v1.0.0 (standalone)
+│   └── NetworkIPChanger.spec     # v1.0.0 build configuration
+│
+├── 📊 CONFIGURATION FILES
+│   ├── requirements.txt          # Python dependencies
+│   ├── common_networks.json      # Pre-configured home network profiles
+│   ├── sample_profiles.json      # Sample network configurations
+│   └── enterprise_profiles.json  # Enterprise network templates
+│
+└── 🌐 TRANSLATIONS
+    └── i18n/                    # Internationalization files
+        ├── en.json              # English translations
+        ├── ar.json              # Arabic translations
+        ├── fa.json              # Persian translations
+        ├── ku.json              # Kurdish translations
+        ├── ku_sorani.json       # Kurdish Sorani translations
+        └── tr.json              # Turkish translations
 ```
+
+### Version Comparison
+
+| Feature | v1.0.0 (`ipchanger.py`) | v2.0.0 (`ipchanger_v2.py`) |
+|---------|------------------------|---------------------------|
+| Basic IP configuration | ✅ | ✅ |
+| Profile management | ✅ | ✅ Enhanced with import/export |
+| Multi-language support | ✅ | ✅ |
+| Command-line interface | ❌ | ✅ |
+| Network testing suite | ❌ | ✅ |
+| VPN management | ❌ | ✅ |
+| Network monitoring | ❌ | ✅ Real-time charts |
+| Speed testing | ❌ | ✅ |
+| Advanced routing | ❌ | ✅ |
+| Batch configuration | ❌ | ✅ |
 
 ## 🔧 Configuration Files
 
