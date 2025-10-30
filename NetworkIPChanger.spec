@@ -1,66 +1,44 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_submodules
 
-import os
-from pathlib import Path
+hiddenimports = ['PySide6.QtCore', 'PySide6.QtWidgets', 'PySide6.QtGui', 'PySide6.QtWidgets.QApplication', 'PySide6.QtWidgets.QWidget', 'PySide6.QtWidgets.QMainWindow', 'PySide6.QtWidgets.QVBoxLayout', 'PySide6.QtWidgets.QHBoxLayout', 'PySide6.QtWidgets.QLabel', 'PySide6.QtWidgets.QPushButton', 'PySide6.QtWidgets.QComboBox', 'PySide6.QtWidgets.QLineEdit', 'PySide6.QtWidgets.QTextEdit', 'PySide6.QtWidgets.QMessageBox', 'PySide6.QtWidgets.QFileDialog', 'PySide6.QtWidgets.QGroupBox', 'PySide6.QtWidgets.QRadioButton', 'PySide6.QtWidgets.QButtonGroup', 'PySide6.QtWidgets.QFormLayout', 'PySide6.QtWidgets.QListWidget', 'PySide6.QtWidgets.QListWidgetItem', 'PySide6.QtWidgets.QInputDialog', 'PySide6.QtWidgets.QSizePolicy', 'PySide6.QtWidgets.QSpacerItem', 'shiboken6']
+hiddenimports += collect_submodules('PySide6')
 
-# Get the current directory
-current_dir = Path(SPECPATH)
-
-block_cipher = None
-
-# Define data files to include
-datas = [
-    # Include language files
-    (str(current_dir / 'i18n'), 'i18n'),
-    # Include icon file
-    (str(current_dir / 'ip.ico'), '.'),
-]
-
-# Define hidden imports (for PySide6)
-hiddenimports = [
-    'PySide6.QtCore',
-    'PySide6.QtWidgets', 
-    'PySide6.QtGui',
-]
 
 a = Analysis(
     ['ipchanger.py'],
     pathex=[],
     binaries=[],
-    datas=datas,
+    datas=[('i18n', 'i18n'), ('ip.ico', '.')],
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
     noarchive=False,
+    optimize=0,
 )
-
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+pyz = PYZ(a.pure)
 
 exe = EXE(
     pyz,
     a.scripts,
     a.binaries,
-    a.zipfiles,
     a.datas,
     [],
     name='NetworkIPChanger',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # Set to False for windowed app
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(current_dir / 'ip.ico'),  # Set the icon
-    uac_admin=True,  # Request admin privileges automatically
+    uac_admin=True,
+    icon=['ip.ico'],
 )
