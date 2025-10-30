@@ -44,7 +44,7 @@ A professional Windows network configuration tool with a modern GUI that allows 
 ### Option 2: Run from Source
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/ipchanger.git
+   git clone https://github.com/Gatalar2121/ipchanger.git
    cd ipchanger
    ```
 
