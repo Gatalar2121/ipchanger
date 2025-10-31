@@ -36,9 +36,9 @@ A comprehensive Windows network configuration tool with enhanced GUI and CLI int
 - **Enhanced Tabbed GUI**: Professional interface with organized feature tabs
 - **Network Testing Suite**: Comprehensive connectivity, speed, and DNS testing
 - **VPN Profile Management**: Create, manage, and connect to VPN profiles using Windows RASDIAL
-- **Advanced Routing**: Static route configuration and management
 - **Real-Time Monitoring**: Network traffic monitoring with charts and statistics
-- **Batch Configuration**: Apply settings from JSON/CSV files to multiple adapters
+- **Advanced Routing**: Add/delete static routes with persistent configuration (GUI + CLI)
+- **Batch Configuration**: Apply settings from JSON/CSV files to multiple adapters (GUI + CLI)
 
 ### v1.0.0 Exclusive Features
 - None (all v1.0.0 features have been ported to v2.0.0)
@@ -223,8 +223,8 @@ ipchanger/
 | VPN management | ❌ | ✅ |
 | Network monitoring | ❌ | ✅ Real-time charts |
 | Speed testing | ❌ | ✅ |
-| Advanced routing | ❌ | ✅ |
-| Batch configuration | ❌ | ✅ |
+| **Advanced routing** | ❌ | ✅ GUI + CLI |
+| **Batch configuration** | ❌ | ✅ GUI + CLI |
 
 ## 🔧 Configuration Files
 

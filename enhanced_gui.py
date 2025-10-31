@@ -1380,6 +1380,409 @@ class MonitoringTab(QWidget):
         if self.cloudflare_status.text() in ("", previous_unknown):
             self.cloudflare_status.setText(new_unknown)
 
+class AdvancedRoutingTab(QWidget):
+    """Advanced routing configuration tab."""
+    
+    def __init__(self):
+        super().__init__()
+        self.routing = None
+        self.init_ui()
+    
+    def init_ui(self):
+        """Initialize routing interface."""
+        layout = QVBoxLayout()
+        
+        # Current routing table
+        self.table_group = QGroupBox()
+        table_layout = QVBoxLayout()
+        
+        self.refresh_table_btn = QPushButton()
+        self.refresh_table_btn.clicked.connect(self.refresh_routing_table)
+        
+        self.routing_table = QTextEdit()
+        self.routing_table.setReadOnly(True)
+        self.routing_table.setFont(QFont("Courier New", 9))
+        
+        table_layout.addWidget(self.refresh_table_btn)
+        table_layout.addWidget(self.routing_table)
+        self.table_group.setLayout(table_layout)
+        
+        # Add route form
+        self.add_group = QGroupBox()
+        add_layout = QFormLayout()
+        
+        self.dest_label = QLabel()
+        self.dest_edit = QLineEdit()
+        self.dest_edit.setPlaceholderText("0.0.0.0")
+        
+        self.mask_label = QLabel()
+        self.mask_edit = QLineEdit()
+        self.mask_edit.setPlaceholderText("0.0.0.0")
+        
+        self.gateway_label = QLabel()
+        self.gateway_edit = QLineEdit()
+        self.gateway_edit.setPlaceholderText("192.168.1.1")
+        
+        self.metric_label = QLabel()
+        self.metric_edit = QLineEdit()
+        self.metric_edit.setText("1")
+        
+        self.persistent_label = QLabel()
+        self.persistent_check = QCheckBox()
+        
+        add_layout.addRow(self.dest_label, self.dest_edit)
+        add_layout.addRow(self.mask_label, self.mask_edit)
+        add_layout.addRow(self.gateway_label, self.gateway_edit)
+        add_layout.addRow(self.metric_label, self.metric_edit)
+        add_layout.addRow(self.persistent_label, self.persistent_check)
+        
+        add_button_layout = QHBoxLayout()
+        self.add_route_btn = QPushButton()
+        self.add_route_btn.clicked.connect(self.add_route)
+        self.delete_route_btn = QPushButton()
+        self.delete_route_btn.clicked.connect(self.delete_route)
+        
+        add_button_layout.addWidget(self.add_route_btn)
+        add_button_layout.addWidget(self.delete_route_btn)
+        add_button_layout.addStretch()
+        
+        add_layout.addRow(add_button_layout)
+        self.add_group.setLayout(add_layout)
+        
+        layout.addWidget(self.table_group, 2)
+        layout.addWidget(self.add_group, 1)
+        
+        self.setLayout(layout)
+        self.refresh_language()
+        self.refresh_routing_table()
+    
+    def refresh_language(self):
+        """Refresh localized strings."""
+        self.table_group.setTitle(tr_gui("routing_table", "Current Routing Table"))
+        self.refresh_table_btn.setText(tr_gui("refresh_table", "Refresh Routing Table"))
+        self.add_group.setTitle(tr_gui("add_route", "Add Static Route"))
+        self.dest_label.setText(tr_gui("destination", "Destination:"))
+        self.mask_label.setText(tr_gui("netmask", "Netmask:"))
+        self.gateway_label.setText(tr_gui("gateway", "Gateway:"))
+        self.metric_label.setText(tr_gui("metric", "Metric:"))
+        self.persistent_label.setText(tr_gui("persistent", "Persistent:"))
+        self.add_route_btn.setText(tr_gui("add_route_btn", "Add Route"))
+        self.delete_route_btn.setText(tr_gui("delete_route_btn", "Delete Route"))
+    
+    def refresh_routing_table(self):
+        """Refresh and display routing table."""
+        try:
+            from advanced_networking import AdvancedRouting
+            if not self.routing:
+                from pathlib import Path
+                routes_path = Path.home() / ".ipchanger" / "custom_routes.json"
+                self.routing = AdvancedRouting(routes_path)
+            
+            routes = self.routing.get_routing_table()
+            
+            output = f"{'Destination':<18} {'Netmask':<18} {'Gateway':<18} {'Interface':<15} {'Metric':<6}\n"
+            output += "=" * 80 + "\n"
+            
+            for route in routes[:30]:  # Show first 30 routes
+                output += f"{route.get('destination', ''):<18} "
+                output += f"{route.get('netmask', ''):<18} "
+                output += f"{route.get('gateway', ''):<18} "
+                output += f"{route.get('interface', ''):<15} "
+                output += f"{route.get('metric', ''):<6}\n"
+            
+            self.routing_table.setPlainText(output)
+            log_message("Routing table refreshed")
+            
+        except Exception as e:
+            self.routing_table.setPlainText(f"Error loading routing table: {str(e)}")
+            log_message(f"Failed to load routing table: {str(e)}", "ERROR")
+    
+    def add_route(self):
+        """Add a static route."""
+        destination = self.dest_edit.text().strip()
+        netmask = self.mask_edit.text().strip()
+        gateway = self.gateway_edit.text().strip()
+        metric = self.metric_edit.text().strip() or "1"
+        persistent = self.persistent_check.isChecked()
+        
+        if not destination or not netmask or not gateway:
+            QMessageBox.warning(self, tr("failed"), "Destination, netmask, and gateway are required")
+            return
+        
+        reply = QMessageBox.question(
+            self,
+            tr_gui("confirm_add_route", "Confirm Add Route"),
+            f"Add route to {destination} via {gateway}?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                from advanced_networking import AdvancedRouting
+                from pathlib import Path
+                
+                if not self.routing:
+                    routes_path = Path.home() / ".ipchanger" / "custom_routes.json"
+                    self.routing = AdvancedRouting(routes_path)
+                
+                success, message = self.routing.add_static_route(
+                    destination, netmask, gateway, 
+                    metric=int(metric), persistent=persistent
+                )
+                
+                if success:
+                    QMessageBox.information(self, tr("success"), f"Route added: {message}")
+                    log_message(f"Route added: {destination} via {gateway}")
+                    self.refresh_routing_table()
+                    # Clear form
+                    self.dest_edit.clear()
+                    self.mask_edit.clear()
+                    self.gateway_edit.clear()
+                    self.metric_edit.setText("1")
+                    self.persistent_check.setChecked(False)
+                else:
+                    QMessageBox.critical(self, tr("failed"), f"Failed to add route: {message}")
+                    log_message(f"Failed to add route: {message}", "ERROR")
+                    
+            except Exception as e:
+                QMessageBox.critical(self, tr("failed"), f"Error adding route: {str(e)}")
+                log_message(f"Error adding route: {str(e)}", "ERROR")
+    
+    def delete_route(self):
+        """Delete a static route."""
+        destination = self.dest_edit.text().strip()
+        netmask = self.mask_edit.text().strip()
+        gateway = self.gateway_edit.text().strip()
+        
+        if not destination:
+            QMessageBox.warning(self, tr("failed"), "Destination is required to delete a route")
+            return
+        
+        reply = QMessageBox.question(
+            self,
+            tr_gui("confirm_delete_route", "Confirm Delete Route"),
+            f"Delete route to {destination}?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                from advanced_networking import AdvancedRouting
+                from pathlib import Path
+                
+                if not self.routing:
+                    routes_path = Path.home() / ".ipchanger" / "custom_routes.json"
+                    self.routing = AdvancedRouting(routes_path)
+                
+                success, message = self.routing.delete_static_route(
+                    destination, netmask if netmask else None, gateway if gateway else None
+                )
+                
+                if success:
+                    QMessageBox.information(self, tr("success"), f"Route deleted: {message}")
+                    log_message(f"Route deleted: {destination}")
+                    self.refresh_routing_table()
+                else:
+                    QMessageBox.critical(self, tr("failed"), f"Failed to delete route: {message}")
+                    log_message(f"Failed to delete route: {message}", "ERROR")
+                    
+            except Exception as e:
+                QMessageBox.critical(self, tr("failed"), f"Error deleting route: {str(e)}")
+                log_message(f"Error deleting route: {str(e)}", "ERROR")
+
+class BatchConfigurationTab(QWidget):
+    """Batch configuration tab for applying settings to multiple adapters."""
+    
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+    
+    def init_ui(self):
+        """Initialize batch configuration interface."""
+        layout = QVBoxLayout()
+        
+        # File selection
+        file_group = QGroupBox()
+        file_layout = QHBoxLayout()
+        
+        self.file_label = QLabel()
+        self.file_path = QLineEdit()
+        self.file_path.setReadOnly(True)
+        self.browse_btn = QPushButton()
+        self.browse_btn.clicked.connect(self.browse_file)
+        
+        file_layout.addWidget(self.file_label)
+        file_layout.addWidget(self.file_path)
+        file_layout.addWidget(self.browse_btn)
+        file_group.setLayout(file_layout)
+        
+        # Preview
+        self.preview_group = QGroupBox()
+        preview_layout = QVBoxLayout()
+        self.preview_text = QTextEdit()
+        self.preview_text.setReadOnly(True)
+        self.preview_text.setMinimumHeight(200)
+        preview_layout.addWidget(self.preview_text)
+        self.preview_group.setLayout(preview_layout)
+        
+        # Instructions
+        self.instructions_group = QGroupBox()
+        instructions_layout = QVBoxLayout()
+        self.instructions_text = QTextEdit()
+        self.instructions_text.setReadOnly(True)
+        self.instructions_text.setMaximumHeight(150)
+        instructions_layout.addWidget(self.instructions_text)
+        self.instructions_group.setLayout(instructions_layout)
+        
+        # Action buttons
+        button_layout = QHBoxLayout()
+        self.apply_btn = QPushButton()
+        self.apply_btn.clicked.connect(self.apply_batch_config)
+        self.apply_btn.setEnabled(False)
+        button_layout.addStretch()
+        button_layout.addWidget(self.apply_btn)
+        
+        layout.addWidget(file_group)
+        layout.addWidget(self.preview_group)
+        layout.addWidget(self.instructions_group)
+        layout.addLayout(button_layout)
+        
+        self.setLayout(layout)
+        self.refresh_language()
+    
+    def refresh_language(self):
+        """Refresh localized strings."""
+        self.file_label.setText(tr_gui("config_file", "Configuration File:"))
+        self.browse_btn.setText(tr_gui("browse", "Browse..."))
+        self.preview_group.setTitle(tr_gui("file_preview", "File Preview"))
+        self.instructions_group.setTitle(tr_gui("instructions", "Instructions"))
+        self.apply_btn.setText(tr_gui("apply_batch", "Apply Batch Configuration"))
+        
+        instructions = """JSON Format Example:
+[
+  {
+    "adapter": "Ethernet",
+    "dhcp": "false",
+    "ip": "192.168.1.100",
+    "mask": "255.255.255.0",
+    "gateway": "192.168.1.1",
+    "dns": "8.8.8.8,8.8.4.4"
+  }
+]
+
+CSV Format Example:
+adapter,dhcp,ip,mask,gateway,dns
+Ethernet,false,192.168.1.100,255.255.255.0,192.168.1.1,8.8.8.8
+Wi-Fi,true,,,,
+"""
+        self.instructions_text.setPlainText(instructions)
+    
+    def browse_file(self):
+        """Open file browser to select configuration file."""
+        from PySide6.QtWidgets import QFileDialog
+        
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            tr_gui("select_config_file", "Select Configuration File"),
+            "",
+            "Config Files (*.json *.csv);;All Files (*.*)"
+        )
+        
+        if file_path:
+            self.file_path.setText(file_path)
+            self.load_preview(file_path)
+            self.apply_btn.setEnabled(True)
+    
+    def load_preview(self, file_path):
+        """Load and preview the configuration file."""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            self.preview_text.setPlainText(content[:2000])  # Show first 2000 chars
+        except Exception as e:
+            self.preview_text.setPlainText(f"Error reading file: {str(e)}")
+    
+    def apply_batch_config(self):
+        """Apply batch configuration from selected file."""
+        config_file = self.file_path.text()
+        if not config_file:
+            QMessageBox.warning(self, tr("failed"), "Please select a configuration file")
+            return
+        
+        reply = QMessageBox.question(
+            self,
+            tr_gui("confirm_batch", "Confirm Batch Configuration"),
+            "Apply configuration from file to all specified adapters?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                import json
+                import csv
+                from pathlib import Path
+                
+                config_path = Path(config_file)
+                configs = []
+                
+                if config_path.suffix.lower() == '.json':
+                    with open(config_path, 'r', encoding='utf-8') as f:
+                        configs = json.load(f)
+                elif config_path.suffix.lower() == '.csv':
+                    with open(config_path, 'r', encoding='utf-8') as f:
+                        reader = csv.DictReader(f)
+                        configs = list(reader)
+                
+                results = []
+                for config in configs:
+                    adapter_name = config.get('adapter')
+                    if not adapter_name:
+                        continue
+                    
+                    if config.get('dhcp', '').lower() in ('true', 'yes', '1'):
+                        rc1, _, err1 = run_netsh(["interface", "ip", "set", "address", f'name="{adapter_name}"', "dhcp"])
+                        rc2, _, err2 = run_netsh(["interface", "ip", "set", "dns", f'name="{adapter_name}"', "dhcp"])
+                        if rc1 == 0 and rc2 == 0:
+                            results.append(f"✅ {adapter_name}: DHCP configured")
+                        else:
+                            results.append(f"❌ {adapter_name}: {err1 or err2}")
+                    else:
+                        ip = config.get('ip')
+                        mask = config.get('mask', '255.255.255.0')
+                        gateway = config.get('gateway')
+                        dns = config.get('dns', '')
+                        
+                        if ip:
+                            cmd = ["interface", "ip", "set", "address", f'name="{adapter_name}"', "static", ip, mask]
+                            if gateway:
+                                cmd.append(gateway)
+                            
+                            rc, _, err = run_netsh(cmd)
+                            if rc == 0:
+                                if dns:
+                                    dns_servers = [d.strip() for d in dns.split(',')]
+                                    for i, dns_server in enumerate(dns_servers):
+                                        if dns_server:
+                                            dns_cmd = ["interface", "ip", "set", "dns", f'name="{adapter_name}"']
+                                            if i == 0:
+                                                dns_cmd.extend(["static", dns_server])
+                                            else:
+                                                dns_cmd.extend(["static", dns_server, f"index={i+1}"])
+                                            run_netsh(dns_cmd)
+                                results.append(f"✅ {adapter_name}: Static IP {ip} configured")
+                            else:
+                                results.append(f"❌ {adapter_name}: {err}")
+                
+                QMessageBox.information(self, tr("success"), "\n".join(results))
+                log_message("Batch configuration applied")
+                
+            except Exception as e:
+                QMessageBox.critical(self, tr("failed"), f"Batch configuration failed: {str(e)}")
+                log_message(f"Batch configuration failed: {str(e)}", "ERROR")
+
 class EnhancedNetworkGUI(QMainWindow):
     """Enhanced main window with tabbed interface."""
     
@@ -1417,10 +1820,14 @@ class EnhancedNetworkGUI(QMainWindow):
         self.network_tab = OriginalNetworkTab()
         self.testing_tab = NetworkTestingTab()
         self.monitoring_tab = MonitoringTab()
+        self.routing_tab = AdvancedRoutingTab()
+        self.batch_tab = BatchConfigurationTab()
         
         self.tab_widget.addTab(self.network_tab, tr_gui("network_configuration", "Network Configuration"))
         self.tab_widget.addTab(self.testing_tab, tr_gui("network_testing", "Network Testing"))
         self.tab_widget.addTab(self.monitoring_tab, tr_gui("network_monitoring", "Network Monitoring"))
+        self.tab_widget.addTab(self.routing_tab, tr_gui("advanced_routing", "Advanced Routing"))
+        self.tab_widget.addTab(self.batch_tab, tr_gui("batch_configuration", "Batch Configuration"))
         
         layout.addLayout(lang_layout)
         layout.addWidget(self.tab_widget)
@@ -1454,6 +1861,8 @@ class EnhancedNetworkGUI(QMainWindow):
         self.tab_widget.setTabText(0, tr_gui("network_configuration", "Network Configuration"))
         self.tab_widget.setTabText(1, tr_gui("network_testing", "Network Testing"))
         self.tab_widget.setTabText(2, tr_gui("network_monitoring", "Network Monitoring"))
+        self.tab_widget.setTabText(3, tr_gui("advanced_routing", "Advanced Routing"))
+        self.tab_widget.setTabText(4, tr_gui("batch_configuration", "Batch Configuration"))
         
         # Refresh all tab labels
         try:
@@ -1468,6 +1877,16 @@ class EnhancedNetworkGUI(QMainWindow):
 
         try:
             self.network_tab.refresh_language()
+        except AttributeError:
+            pass
+        
+        try:
+            self.routing_tab.refresh_language()
+        except AttributeError:
+            pass
+        
+        try:
+            self.batch_tab.refresh_language()
         except AttributeError:
             pass
 
