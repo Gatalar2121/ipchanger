@@ -33,10 +33,10 @@ A comprehensive Windows network configuration tool with enhanced GUI and CLI int
 
 ### 🆕 New in v2.0.0
 - **Command-Line Interface**: Full CLI support with interactive and batch modes
-- **Enhanced Tabbed GUI**: Professional interface with organized feature tabs
-- **Network Testing Suite**: Comprehensive connectivity, speed, and DNS testing
-- **VPN Profile Management**: Create, manage, and connect to VPN profiles using Windows RASDIAL
-- **Real-Time Monitoring**: Network traffic monitoring with charts and statistics
+- **Enhanced Tabbed GUI**: Professional interface with 5 organized feature tabs
+- **Network Testing Suite**: Comprehensive connectivity, speed, and DNS testing (GUI)
+- **VPN Profile Management**: Create, manage, and connect to VPN profiles using Windows RASDIAL (CLI only)
+- **Real-Time Monitoring**: Network traffic monitoring with charts and statistics (GUI)
 - **Advanced Routing**: Add/delete static routes with persistent configuration (GUI + CLI)
 - **Batch Configuration**: Apply settings from JSON/CSV files to multiple adapters (GUI + CLI)
 
@@ -93,6 +93,10 @@ A comprehensive Windows network configuration tool with enhanced GUI and CLI int
 
 3. Run the application:
    ```bash
+   # Run v2.0.0 (recommended - enhanced GUI with all features)
+   python ipchanger_v2.py
+   
+   # Or run v1.0.0 (classic interface)
    python ipchanger.py
    ```
 
@@ -102,11 +106,17 @@ A comprehensive Windows network configuration tool with enhanced GUI and CLI int
    ```bash
    pip install pyinstaller
    ```
-3. Build the executable:
+3. Build the executables:
    ```bash
-   pyinstaller NetworkIPChanger.spec
+   # Build all three versions (recommended)
+   build_v2.bat
+   
+   # Or build individual versions:
+   pyinstaller NetworkIPChanger_v2.0.0.spec     # Enhanced v2.0.0
+   pyinstaller NetworkIPChanger_CLI_v2.0.0.spec # CLI only
+   pyinstaller NetworkIPChanger.spec            # Classic v1.0.0
    ```
-4. The executable will be created in the `dist` folder
+4. The executables will be created in the `dist` folder
 
 ## 🖥️ Usage
 
@@ -219,10 +229,10 @@ ipchanger/
 | **Undo functionality** | ✅ GUI button | ✅ GUI button |
 | **Adapter enable/disable** | ❌ | ✅ GUI buttons + CLI |
 | Command-line interface | ❌ | ✅ |
-| Network testing suite | ❌ | ✅ |
-| VPN management | ❌ | ✅ |
-| Network monitoring | ❌ | ✅ Real-time charts |
-| Speed testing | ❌ | ✅ |
+| Network testing suite | ❌ | ✅ GUI |
+| VPN management | ❌ | ✅ CLI only |
+| Network monitoring | ❌ | ✅ GUI (real-time charts) |
+| Speed testing | ❌ | ✅ GUI |
 | **Advanced routing** | ❌ | ✅ GUI + CLI |
 | **Batch configuration** | ❌ | ✅ GUI + CLI |
 
